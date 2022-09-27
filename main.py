@@ -25,6 +25,7 @@ search_input_locator = "search-textbox"
 toggle_button_locator = "//div[@id='top-bar']//a[@id='a3-toggle']"
 results_button_locator = "//a[.='sonuçlar']"
 accept_policy_locator = "//button[@id='onetrust-accept-btn-handler']"
+topic_title_locator = "//div[@id='topic']/h1"
 
 def chrom_set():
     coptions = webdriver.ChromeOptions()
@@ -42,6 +43,9 @@ def chrom_set():
     chrome_driver = webdriver.Chrome(desired_capabilities=caps,service=Service(ChromeDriverManager().install()), options=coptions)
     chrome_driver.maximize_window()
     return chrome_driver
+def get_topic_title():
+    topic_title = driver.find_element(By.XPATH, topic_title_locator)
+    return str(topic_title.text)
 
 
 baslik = input("EkşiParser: Hangi başlığı aramak istiyorsunuz?\n")
@@ -73,17 +77,20 @@ static_main_url = driver.current_url
 content_results = driver.find_elements(By.XPATH, content_results_locator)
 res_len = int(len(content_results))
 
-for i in range(1, 3):
+# !! limitation Range, use "4" in test env. In release env. use "res_len" variable. !!
+for i in range(1, 4):
 
     current_element_locator = "//div[@id='content']//ul[contains(@class, 'topic-list')]//li[" + str(i) + "]"
     current_element = driver.find_element(By.XPATH, current_element_locator)
     actions.move_to_element(current_element).perform()
     current_element.click()
-    time.sleep(4)
+    time.sleep(5)
 
     source = driver.page_source
     soup = BeautifulSoup(source, "html.parser")
     current_url = driver.current_url
+
+    set_topic_title = get_topic_title()
 
     try:
         page_count = len(
@@ -109,7 +116,7 @@ for i in range(1, 3):
                 entry.text,
                 author,
                 date,
-                baslik,
+                set_topic_title,
             ))
     try:
         driver.get(static_main_url)
