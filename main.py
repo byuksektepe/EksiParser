@@ -55,6 +55,8 @@ columns = [
     'Yazar',
     'Tarih',
     'Konu',
+    'Entry ID',
+    'Entry URL'
 ]
 rows = [columns]
 
@@ -84,7 +86,7 @@ for i in range(1, 4):
     current_element = driver.find_element(By.XPATH, current_element_locator)
     actions.move_to_element(current_element).perform()
     current_element.click()
-    time.sleep(5)
+    time.sleep(6)
 
     source = driver.page_source
     soup = BeautifulSoup(source, "html.parser")
@@ -109,14 +111,23 @@ for i in range(1, 4):
         entry_divs = soup.find_all("div", {"class": "content"})
 
         for entry in entry_divs:
+
             footer = entry.findNext("footer")
+
+            data_id = str(entry.findParent("li").attrs["data-id"])
+            entry_id = "#" + data_id
+            entry_url = "https://eksisozluk.com/entry/" + data_id
+
             author = footer.find_all("a")[0].text
             date = footer.find_all("a")[1].text
+
             rows.append((
                 entry.text,
                 author,
                 date,
                 set_topic_title,
+                entry_id,
+                entry_url
             ))
     try:
         driver.get(static_main_url)
@@ -127,7 +138,7 @@ for i in range(1, 4):
 
 df = pd.DataFrame(rows)
 now_time = datetime.datetime.now()
-writer_b = pd.ExcelWriter('rapor-' + str(baslik) + '-' + str(now_time.date()) + '.xlsx', engine='xlsxwriter')
+writer_b = pd.ExcelWriter('Rapor-' + str(baslik) + '-' + str(now_time.date()) + '.xlsx', engine='xlsxwriter')
 df.to_excel(writer_b, sheet_name=str(now_time.date()), index=False)
 writer_b.save()
 driver.close()
