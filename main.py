@@ -27,7 +27,7 @@ results_button_locator = "//a[.='sonuçlar']"
 accept_policy_locator = "//button[@id='onetrust-accept-btn-handler']"
 topic_title_locator = "//div[@id='topic']/h1"
 
-def chrom_set():
+def set_driver():
     coptions = webdriver.ChromeOptions()
     options.add_argument("--disable-blink-features")
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -62,7 +62,7 @@ rows = [columns]
 
 url = "https://eksisozluk.com/basliklar/ara?SearchForm.Keywords="+baslik+"&SearchForm.Author=&SearchForm.When.From=&SearchForm.When.To=&SearchForm.NiceOnly=false&SearchForm.SortOrder=Date"
 # Set Web Driver and Navigate to URL
-driver = chrom_set()
+driver = set_driver()
 driver.get(url)
 
 time.sleep(2)
