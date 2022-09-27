@@ -44,7 +44,7 @@ def chrom_set():
     return chrome_driver
 
 
-baslik = input("hangi başlığı aramak istiyorsunuz?\n")
+baslik = input("EkşiParser: Hangi başlığı aramak istiyorsunuz?\n")
 
 columns = [
     'Icerik',
@@ -78,7 +78,6 @@ for i in range(1, 3):
     current_element_locator = "//div[@id='content']//ul[contains(@class, 'topic-list')]//li[" + str(i) + "]"
     current_element = driver.find_element(By.XPATH, current_element_locator)
     actions.move_to_element(current_element).perform()
-    time.sleep(1)
     current_element.click()
     time.sleep(4)
 
@@ -94,7 +93,7 @@ for i in range(1, 3):
         page_count = 1
 
     for j in range(1, page_count + 1):
-        print("OK" + str(j))
+        print("OK - Lütfen Bekleyin...")
         response = requests.get(current_url + "?p=" + str(j), headers=headers)
 
         time.sleep(2)
@@ -116,7 +115,12 @@ for i in range(1, 3):
         driver.get(static_main_url)
     except InvalidArgumentException:
         print(static_main_url)
-    time.sleep(5)
+    time.sleep(3)
 
-print(rows)
+
+df = pd.DataFrame(rows)
+now_time = datetime.datetime.now()
+writer_b = pd.ExcelWriter('rapor-' + str(baslik) + '-' + str(now_time.date()) + '.xlsx', engine='xlsxwriter')
+df.to_excel(writer_b, sheet_name=str(now_time.date()), index=False)
+writer_b.save()
 driver.close()
