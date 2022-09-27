@@ -121,6 +121,7 @@ for i in range(1, 4):
             author = footer.find_all("a")[0].text
             date = footer.find_all("a")[1].text
 
+            # DATA AREA -->
             rows.append((
                 entry.text,
                 author,
@@ -129,6 +130,7 @@ for i in range(1, 4):
                 entry_id,
                 entry_url
             ))
+            # <-- DATA AREA
     try:
         driver.get(static_main_url)
     except InvalidArgumentException:
