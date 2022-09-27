@@ -28,6 +28,7 @@ accept_policy_locator = "//button[@id='onetrust-accept-btn-handler']"
 topic_title_locator = "//div[@id='topic']/h1"
 
 def set_driver():
+
     coptions = webdriver.ChromeOptions()
     options.add_argument("--disable-blink-features")
     options.add_argument("--disable-blink-features=AutomationControlled")
@@ -40,7 +41,9 @@ def set_driver():
     caps = DesiredCapabilities().CHROME
     caps["pageLoadStrategy"] = "eager"  # complete
 
-    chrome_driver = webdriver.Chrome(desired_capabilities=caps,service=Service(ChromeDriverManager().install()), options=coptions)
+    chrome_driver = webdriver.Chrome(desired_capabilities=caps,
+                                     service=Service(ChromeDriverManager().install()),
+                                     options=coptions)
     chrome_driver.maximize_window()
     return chrome_driver
 def get_topic_title():
@@ -100,7 +103,7 @@ for i in range(1, 4):
                 "option"))
     except:
         page_count = 1
-
+    # Check every page
     for j in range(1, page_count + 1):
         print("OK - Lütfen Bekleyin...")
         response = requests.get(current_url + "?p=" + str(j), headers=headers)
@@ -110,6 +113,7 @@ for i in range(1, 4):
         soup = BeautifulSoup(response.content, "html.parser")
         entry_divs = soup.find_all("div", {"class": "content"})
 
+        # Check every entrys
         for entry in entry_divs:
 
             footer = entry.findNext("footer")
@@ -133,14 +137,23 @@ for i in range(1, 4):
             # <-- DATA AREA
     try:
         driver.get(static_main_url)
+
     except InvalidArgumentException:
         print(static_main_url)
-    time.sleep(3)
 
+    time.sleep(3)
 
 df = pd.DataFrame(rows)
 now_time = datetime.datetime.now()
+
+# Write to xlsx file
 writer_b = pd.ExcelWriter('Rapor-' + str(baslik) + '-' + str(now_time.date()) + '.xlsx', engine='xlsxwriter')
-df.to_excel(writer_b, sheet_name=str(now_time.date()), index=False)
+df.to_excel(writer_b,
+            sheet_name=str(now_time.date()),
+            index=False)
+
+#Save to file
 writer_b.save()
+
+#Close Browser
 driver.close()
