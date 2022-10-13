@@ -1,21 +1,25 @@
 import datetime
+import os
+import sqlite3
 import time
+from sqlite3 import Error
 
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common import InvalidArgumentException
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from webdriver_manager.chrome import ChromeDriverManager
 
 options = Options()
 
-headers = { 'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36" }
+headers = {
+    'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"}
 
 left_results_locator = "//nav[@id='partial-index']//ul[contains(@class, 'topic-list')]//li"
 content_results_locator = "//div[@id='content']//ul[contains(@class, 'topic-list')]//li"
@@ -25,18 +29,29 @@ search_input_locator = "search-textbox"
 toggle_button_locator = "//div[@id='top-bar']//a[@id='a3-toggle']"
 results_button_locator = "//a[.='sonuçlar']"
 accept_policy_locator = "//button[@id='onetrust-accept-btn-handler']"
-topic_title_locator = "//div[@id='topic']/h1"
+topic_title_locator = "//div[@id='topic']//h1"
+
 
 def set_driver():
-
     coptions = webdriver.ChromeOptions()
-    options.add_argument("--disable-blink-features")
-    options.add_argument("--disable-blink-features=AutomationControlled")
-    options.add_argument("ignore-certificate-errors")
-    options.add_argument("--no-sandbox")
-    options.add_argument("disable-notifications")
-    options.add_argument("--disable-infobars")
-    options.add_argument("--disable-extensions")
+    coptions.add_argument("--disable-blink-features")
+    coptions.add_argument("--disable-blink-features=AutomationControlled")
+    coptions.add_argument("ignore-certificate-errors")
+    coptions.add_argument("--no-sandbox")
+    coptions.add_argument("disable-notifications")
+    coptions.add_argument("--disable-infobars")
+    coptions.add_argument("--disable-extensions")
+    coptions.add_argument("--disable-blink-features")
+    coptions.add_argument("--disable-blink-features=AutomationControlled")
+    coptions.add_argument("ignore-certificate-errors")
+    coptions.add_argument("--no-sandbox")
+    coptions.add_argument("disable-notifications")
+    coptions.add_argument("--load-extension=" + os.getcwd() + "/extension")
+    coptions.add_argument("--disable-extensions")
+    coptions.add_argument("--profile-directory=Default")
+    coptions.add_argument("--disable-plugins-discovery")
+
+    # coptions.add_extension("adguard.crx")  # <-- reklam engelleme
 
     caps = DesiredCapabilities().CHROME
     caps["pageLoadStrategy"] = "eager"  # complete
@@ -44,8 +59,11 @@ def set_driver():
     chrome_driver = webdriver.Chrome(desired_capabilities=caps,
                                      service=Service(ChromeDriverManager().install()),
                                      options=coptions)
+    return chrome_driver
     chrome_driver.maximize_window()
     return chrome_driver
+
+
 def get_topic_title():
     topic_title = driver.find_element(By.XPATH, topic_title_locator)
     return str(topic_title.text)
@@ -63,7 +81,7 @@ columns = [
 ]
 rows = [columns]
 
-url = "https://eksisozluk.com/basliklar/ara?SearchForm.Keywords="+baslik+"&SearchForm.Author=&SearchForm.When.From=&SearchForm.When.To=&SearchForm.NiceOnly=false&SearchForm.SortOrder=Date"
+url = "https://eksisozluk.com/basliklar/ara?SearchForm.Keywords=" + baslik + "&SearchForm.Author=&SearchForm.When.From=&SearchForm.When.To=&SearchForm.NiceOnly=false&SearchForm.SortOrder=Date"
 # Set Web Driver and Navigate to URL
 driver = set_driver()
 driver.get(url)
@@ -83,7 +101,7 @@ content_results = driver.find_elements(By.XPATH, content_results_locator)
 res_len = int(len(content_results))
 
 # !! limitation Range, use "4" in test env. In release env. use "res_len" variable. !!
-for i in range(1, 4):
+for i in range(1, 2):
 
     current_element_locator = "//div[@id='content']//ul[contains(@class, 'topic-list')]//li[" + str(i) + "]"
     current_element = driver.find_element(By.XPATH, current_element_locator)
@@ -105,7 +123,7 @@ for i in range(1, 4):
         page_count = 1
     # Check every page
     for j in range(1, page_count + 1):
-        print("OK - Lütfen Bekleyin...")
+        print("All Pages: " + str(page_count) + " Current Page: " + str(j))
         response = requests.get(current_url + "?p=" + str(j), headers=headers)
 
         time.sleep(2)
@@ -115,7 +133,6 @@ for i in range(1, 4):
 
         # Check every entrys
         for entry in entry_divs:
-
             footer = entry.findNext("footer")
 
             data_id = str(entry.findParent("li").attrs["data-id"])
@@ -135,6 +152,7 @@ for i in range(1, 4):
                 entry_url
             ))
             # <-- DATA AREA
+
     try:
         driver.get(static_main_url)
 
@@ -146,14 +164,74 @@ for i in range(1, 4):
 df = pd.DataFrame(rows)
 now_time = datetime.datetime.now()
 
+
 # Write to xlsx file
-writer_b = pd.ExcelWriter('Rapor-' + str(baslik) + '-' + str(now_time.date()) + '.xlsx', engine='xlsxwriter')
-df.to_excel(writer_b,
-            sheet_name=str(now_time.date()),
-            index=False)
+# writer_b = pd.ExcelWriter('Rapor-' + str(baslik) + '-' + str(now_time.date()) + '.xlsx', engine='xlsxwriter')
+# df.to_excel(writer_b,
+#             sheet_name=str(now_time.date()),
+#             index=False)
+#
+# # Save to file
+# writer_b.save()
 
-#Save to file
-writer_b.save()
+# INSERT DATA IN DATABASE
+# Create a connection object
 
-#Close Browser
-driver.close()
+# db area -->
+def create_connection(db_file):
+    """ create a database connection to a SQLite database """
+    conn = None
+    try:
+        if os.path.exists(db_file):
+            conn = sqlite3.connect(db_file)
+        else:
+            print("Database file not found!")
+            # create_database(db_file)
+            conn = sqlite3.connect(db_file)
+
+    except Error as e:
+        print(e)
+
+    return conn
+
+
+try:
+    conn = sqlite3.connect('eksi.db')
+    print("Database connection is successful!")
+
+    c = conn.cursor()
+
+    # verileri tabloya ekle
+
+    c.execute(
+        "CREATE TABLE " + str((baslik).replace(" ",
+                                               "_")) + " (Icerik text, Yazar text, Tarih text, Konu text, Entry_ID text, Entry_URL text)")
+    print("Table created successfully!")
+    conn.commit()
+
+    # verileri tabloya ekle
+    for i in range(1, len(rows)):
+        c.execute("INSERT INTO " + str((baslik).replace(" ",
+                                                        "_")) + " VALUES (?,?,?,?,?,?)", rows[i])
+        print((baslik).replace(" ", "_") + " tablosuna veri eklendi.")
+        conn.commit()
+        print("OK - Veriler veritabanına eklendi.")
+
+    conn.close()
+
+except sqlite3.Error as error:
+    print("Failed to insert data into sqlite table", error)
+
+finally:
+    if (conn):
+        conn.close()
+        print("The SQLite connection is closed")
+
+# <-- db area
+
+# Close the connection
+conn.close()
+
+print("OK - Rapor Oluşturuldu!")
+
+driver.quit()
