@@ -72,6 +72,8 @@ def get_topic_title():
 baslik = input("EkşiParser: Hangi başlığı aramak istiyorsunuz?\n")
 
 columns = [
+
+    'baslik',
     'Icerik',
     'Yazar',
     'Tarih',
@@ -144,6 +146,7 @@ for i in range(1, 2):
 
             # DATA AREA -->
             rows.append((
+                baslik,
                 entry.text,
                 author,
                 date,
@@ -196,7 +199,7 @@ def create_connection(db_file):
 
 
 try:
-    conn = sqlite3.connect('eksi.db')
+    conn = sqlite3.connect('eksi_database.db')
     print("Database connection is successful!")
 
     c = conn.cursor()
@@ -204,15 +207,17 @@ try:
     # verileri tabloya ekle
 
     c.execute(
-        "CREATE TABLE " + str((baslik).replace(" ",
-                                               "_")) + " (Icerik text, Yazar text, Tarih text, Konu text, Entry_ID text, Entry_URL text)")
+        "CREATE TABLE IF NOT EXISTS eksi_table ( aranan_baslik TEXT, Icerik TEXT, Yazar TEXT, Tarih TEXT, Konu TEXT, Entry_ID TEXT, Entry_URL TEXT)")
     print("Table created successfully!")
     conn.commit()
 
+    # eğer eksi_table adında bir tablo varsa devam et yoksa oluştur
+    # c.execute("CREATE TABLE IF NOT EXISTS eksi_table (id INTEGER PRIMARY KEY AUTOINCREMENT, aranan_baslik TEXT, Icerik TEXT, Yazar TEXT, Tarih TEXT, Konu TEXT, Entry_ID TEXT, Entry_URL TEXT)")
+
     # verileri tabloya ekle
     for i in range(1, len(rows)):
-        c.execute("INSERT INTO " + str((baslik).replace(" ",
-                                                        "_")) + " VALUES (?,?,?,?,?,?)", rows[i])
+        c.execute("INSERT INTO " + "eksi_table" + " VALUES (?,?,?,?,?,?,?)", rows[i])
+
         print((baslik).replace(" ", "_") + " tablosuna veri eklendi.")
         conn.commit()
         print("OK - Veriler veritabanına eklendi.")
@@ -231,7 +236,5 @@ finally:
 
 # Close the connection
 conn.close()
-
-print("OK - Rapor Oluşturuldu!")
 
 driver.quit()
