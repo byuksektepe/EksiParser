@@ -6,11 +6,17 @@ from sqlite3 import Error
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
+from fake_headers import Headers
 
 
 eksi_url = "https://eksisozluk.com"
 
 baslik = input("EkşiParser: Hangi başlığı aramak istiyorsunuz?\n")
+
+header = Headers(
+    # generate any browser & os headeers
+    headers=False  # don`t generate misc headers
+)
 
 columns = [
     "id",
@@ -24,8 +30,7 @@ columns = [
 ]
 rows = [columns]
 
-headers = {
-    'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"}
+headers = header.generate()
 
 
 base_url = eksi_url+"/basliklar/ara?SearchForm.Keywords=" + baslik + "&SearchForm.Author=&SearchForm.When.From=&SearchForm.When.To=&SearchForm.NiceOnly=false&SearchForm.SortOrder=Date"

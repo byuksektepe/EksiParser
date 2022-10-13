@@ -15,11 +15,15 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from webdriver_manager.chrome import ChromeDriverManager
+from fake_headers import Headers
 
 options = Options()
+header = Headers(
+    # generate any browser & os headeers
+    headers=False  # don`t generate misc headers
+)
 
-headers = {
-    'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"}
+headers = header.generate()
 
 left_results_locator = "//nav[@id='partial-index']//ul[contains(@class, 'topic-list')]//li"
 content_results_locator = "//div[@id='content']//ul[contains(@class, 'topic-list')]//li"
