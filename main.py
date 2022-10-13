@@ -34,32 +34,21 @@ topic_title_locator = "//div[@id='topic']//h1"
 
 def set_driver():
     coptions = webdriver.ChromeOptions()
-    coptions.add_argument("--disable-blink-features")
-    coptions.add_argument("--disable-blink-features=AutomationControlled")
     coptions.add_argument("ignore-certificate-errors")
     coptions.add_argument("--no-sandbox")
     coptions.add_argument("disable-notifications")
     coptions.add_argument("--disable-infobars")
-    coptions.add_argument("--disable-extensions")
     coptions.add_argument("--disable-blink-features")
     coptions.add_argument("--disable-blink-features=AutomationControlled")
-    coptions.add_argument("ignore-certificate-errors")
-    coptions.add_argument("--no-sandbox")
-    coptions.add_argument("disable-notifications")
-    coptions.add_argument("--load-extension=" + os.getcwd() + "/extension")
-    coptions.add_argument("--disable-extensions")
-    coptions.add_argument("--profile-directory=Default")
-    coptions.add_argument("--disable-plugins-discovery")
-
-    # coptions.add_extension("adguard.crx")  # <-- reklam engelleme
+    coptions.add_extension("ublock.crx")
 
     caps = DesiredCapabilities().CHROME
     caps["pageLoadStrategy"] = "eager"  # complete
 
     chrome_driver = webdriver.Chrome(desired_capabilities=caps,
                                      service=Service(ChromeDriverManager().install()),
+
                                      options=coptions)
-    return chrome_driver
     chrome_driver.maximize_window()
     return chrome_driver
 
@@ -67,6 +56,14 @@ def set_driver():
 def get_topic_title():
     topic_title = driver.find_element(By.XPATH, topic_title_locator)
     return str(topic_title.text)
+
+
+def switch_parent_window(driver):
+    parent = driver.window_handles[0]
+    driver.switch_to.window(parent)
+def close_child_window(driver):
+    child = driver.window_handles[1]
+    driver.switch_to.window(child)
 
 
 baslik = input("EkşiParser: Hangi başlığı aramak istiyorsunuz?\n")
