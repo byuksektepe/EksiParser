@@ -206,7 +206,7 @@ def create_connection(db_file):
 
 
 try:
-    conn = sqlite3.connect('eksi_databasee.db')
+    conn = sqlite3.connect('eksi_database.db')
     print("Database connection is successful!")
 
     c = conn.cursor()

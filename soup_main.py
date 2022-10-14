@@ -107,11 +107,9 @@ print("most_frequent_topic_title: " + str(most_frequent_topic_title) + ", most_f
 
 # Write to xlsx file
 # writer_b = pd.ExcelWriter('Rapor-' + str(baslik) + '-' + str(now_time.date()) + '.xlsx', engine='xlsxwriter')
-# df.to_excel(writer_b,
-#             sheet_name=str(now_time.date()),
-#             index=False)
-#
-# # Save to file
+# df.to_excel(writer_b, sheet_name=str(now_time.date()), index=False)
+
+# Save to file
 # writer_b.save()
 
 # INSERT DATA IN DATABASE
@@ -136,7 +134,7 @@ def create_connection(db_file):
 
 
 try:
-    conn = sqlite3.connect('eksi_databasee.db')
+    conn = sqlite3.connect('eksi_database.db')
     print("Database connection is successful!")
 
     c = conn.cursor()
