@@ -19,7 +19,6 @@ header = Headers(
 )
 
 columns = [
-    "id",
     'baslik',
     'Icerik',
     'Yazar',
@@ -86,7 +85,6 @@ for title in entry_titles:
 
                 # DATA AREA -->
                 rows.append((
-
                     baslik,
                     entry.text,
                     author,
@@ -99,6 +97,12 @@ for title in entry_titles:
 
 df = pd.DataFrame(rows)
 now_time = datetime.datetime.now()
+
+most_frequent_topic_title = df[4].value_counts()[:3].index.tolist()
+most_frequent_author = df[2].value_counts()[:3].index.tolist()
+most_frequent_entry = df[6].value_counts()[:3].index.tolist()
+
+print("most_frequent_topic_title: " + str(most_frequent_topic_title) + ", most_frequent_author:  " + str(most_frequent_author) + ", most_frequent_entry: " + str(most_frequent_entry))
 
 
 # Write to xlsx file

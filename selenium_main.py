@@ -74,7 +74,6 @@ baslik = input("EkşiParser: Hangi başlığı aramak istiyorsunuz?\n")
 
 
 columns = [
-    "id",
     'baslik',
     'Icerik',
     'Yazar',
@@ -105,7 +104,7 @@ content_results = driver.find_elements(By.XPATH, content_results_locator)
 res_len = int(len(content_results))
 
 # !! limitation Range, use "4" in test env. In release env. use "res_len" variable. !!
-for i in range(1, 2):
+for i in range(1, res_len):
 
     current_element_locator = "//div[@id='content']//ul[contains(@class, 'topic-list')]//li[" + str(i) + "]"
     current_element = driver.find_element(By.XPATH, current_element_locator)
@@ -170,6 +169,11 @@ for i in range(1, 2):
 df = pd.DataFrame(rows)
 now_time = datetime.datetime.now()
 
+most_frequent_topic_title = df[4].value_counts()[:3].index.tolist()
+most_frequent_author = df[2].value_counts()[:3].index.tolist()
+most_frequent_entry = df[6].value_counts()[:3].index.tolist()
+
+print("most_frequent_topic_title: " + str(most_frequent_topic_title) + ", most_frequent_author:  " + str(most_frequent_author) + ", most_frequent_entry: " + str(most_frequent_entry))
 
 # Write to xlsx file
 # writer_b = pd.ExcelWriter('Rapor-' + str(baslik) + '-' + str(now_time.date()) + '.xlsx', engine='xlsxwriter')
