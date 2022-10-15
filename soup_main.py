@@ -8,7 +8,6 @@ import requests
 from bs4 import BeautifulSoup
 from fake_headers import Headers
 
-
 eksi_url = "https://eksisozluk.com"
 
 baslik = input("EkşiParser: Hangi başlığı aramak istiyorsunuz?\n")
@@ -98,12 +97,11 @@ for title in entry_titles:
 df = pd.DataFrame(rows)
 now_time = datetime.datetime.now()
 
-most_frequent_topic_title = df[4].value_counts()[:3].index.tolist()
-most_frequent_author = df[2].value_counts()[:3].index.tolist()
-most_frequent_entry = df[6].value_counts()[:3].index.tolist()
+# most_frequent_topic_title = df[4].value_counts()[:3].index.tolist()
+# most_frequent_author = df[2].value_counts()[:3].index.tolist()
+# most_frequent_entry = df[6].value_counts()[:3].index.tolist()
 
-print("most_frequent_topic_title: " + str(most_frequent_topic_title) + ", most_frequent_author:  " + str(most_frequent_author) + ", most_frequent_entry: " + str(most_frequent_entry))
-
+# print("most_frequent_topic_title: " + str(most_frequent_topic_title) + ", \n most_frequent_author:  " + str(most_frequent_author) + ", \n most_frequent_entry: " + str(most_frequent_entry))
 
 # Write to xlsx file
 # writer_b = pd.ExcelWriter('Rapor-' + str(baslik) + '-' + str(now_time.date()) + '.xlsx', engine='xlsxwriter')
@@ -134,7 +132,7 @@ def create_connection(db_file):
 
 
 try:
-    conn = sqlite3.connect('eksi_database.db')
+    conn = sqlite3.connect('eksi_database_new.db')
     print("Database connection is successful!")
 
     c = conn.cursor()
@@ -150,10 +148,7 @@ try:
     # verileri tabloya ekle
     for i in range(1, len(rows)):
         c.execute("INSERT INTO " + "eksi_table" + " VALUES (null,?,?,?,?,?,?,?)", rows[i])
-
-        print((baslik).replace(" ", "_") + " tablosuna veri eklendi.")
         conn.commit()
-        print(rows[i], "eklendi.")
 
     conn.close()
 
@@ -166,6 +161,5 @@ finally:
         print("The SQLite connection is closed")
 
 # <-- db area
-
 # Close the connection
 conn.close()
