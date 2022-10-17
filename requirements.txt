@@ -26,3 +26,6 @@ urllib3==1.26.12
 webdriver-manager==3.8.3
 wsproto==1.2.0
 XlsxWriter==3.0.3
+bs4~=0.0.1
+PyAutoGUI~=0.9.53
+scipy~=1.9.2

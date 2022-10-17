@@ -5,6 +5,7 @@ import sqlite3
 import time
 from sqlite3 import Error
 
+import numpy as np
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -21,6 +22,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from fake_headers import Headers
 import pyautogui
 import random
+import scipy.interpolate as si
 
 options = Options()
 header = Headers(
@@ -29,7 +31,31 @@ header = Headers(
 )
 
 headers = header.generate()
-headless = False
+
+print("Otomatik ekşi entry girme programına hoşgeldiniz\nLütfen istenilen bilgileri eksiksiz giriniz.\n")
+time.sleep(0.6)
+print("-> Not -> Otomasyonu tarayıcı görünür vaziyette çalıştırmak, robot testine takılmanıza neden olabilir."
+      " Eğer bu konuda sorun yaşıyorsanız bir sonraki sorunda 'hayır(H/h)' cevabı veriniz.")
+
+while 1:
+
+    headless_option = (
+        input("-> ? -> Otomasyon çalışırken tarayıcıyı görmek ister misiniz? '--headless' (e/h) \n")).lower()
+
+    if headless_option == "e":
+        headless = False
+        break
+
+    elif headless_option == "h":
+        headless = True
+        break
+    elif headless_option == "exit":
+        exit()
+        break
+    else:
+        print(
+            "-> Hata -> Lütfen sadece Hayır için : (h-H) veya Evet için : (e-E) cevabı veriniz. Çıkmak için (exit) yazınız.\n")
+        continue
 
 emailSelector = "//input[@id='username']"
 passwordSelector = "//input[@id='password']"
@@ -46,9 +72,50 @@ main_titles_selector = "//ul[@id='quick-index-nav']//a[not(contains(@class, 'not
 topic_titles_selector = "//div[@id='index-section']//ul[@class='topic-list partial']//li/a"
 topic_titles_selector_right = "//div[@id='topic']//h1/a"
 
+site_footer_selector = "//footer[@id='site-footer']"
+
 global_wait_timeout = 10
 long_wait_timeout = 20
 short_wait_timeout = 3
+
+
+def human_like_mouse_move(action, start_element):
+    points = [[6, 2], [3, 2], [0, 0], [0, 2]]
+    points = np.array(points)
+    x = points[:, 0]
+    y = points[:, 1]
+
+    t = range(len(points))
+    ipl_t = np.linspace(0.0, len(points) - 1, 100)
+
+    x_tup = si.splrep(t, x, k=1)
+    y_tup = si.splrep(t, y, k=1)
+
+    x_list = list(x_tup)
+    xl = x.tolist()
+    x_list[1] = xl + [0.0, 0.0, 0.0, 0.0]
+
+    y_list = list(y_tup)
+    yl = y.tolist()
+    y_list[1] = yl + [0.0, 0.0, 0.0, 0.0]
+
+    x_i = si.splev(ipl_t, x_list)
+    y_i = si.splev(ipl_t, y_list)
+
+    startElement = start_element
+
+    action.move_to_element(startElement)
+    action.perform()
+
+    c = 5  # change it for more move
+    i = 0
+    for mouse_x, mouse_y in zip(x_i, y_i):
+        action.move_by_offset(mouse_x, mouse_y)
+        action.perform()
+        print("Move mouse to, %s ,%s" % (mouse_x, mouse_y))
+        i += 1
+        if i == c:
+            break
 
 
 def set_driver():
@@ -85,6 +152,7 @@ def set_driver():
 
 
 driver = set_driver()
+action = ActionChains(driver)
 
 
 def send_keys(selector, text):
@@ -110,7 +178,7 @@ def random_get_main_titles(selector):
 
     el_url = str(choice_element.get_attribute("href"))
     try:
-        print(el_url)
+        print(f"Random Selected Main Title : From Navbar : {el_url}")
         driver.get(el_url)
         time.sleep(3)
     except:
@@ -129,6 +197,7 @@ def random_get_topic_titles(left_list_selector, right_list_selector):
             print(f"Random Selected Topic Title : From Left List: {el_url_l}")
             driver.get(el_url_l)
             time.sleep(3)
+
         except:
             print(f"Ignored Exception")
 
@@ -139,18 +208,22 @@ def random_get_topic_titles(left_list_selector, right_list_selector):
 
         if not elements:
 
-            elements_backup = driver.find_elements(By.XPATH, left_list_selector)
+            elements_backup = driver.find_elements(By.XPATH, right_list_selector)
             choice_element_r = random.choice(elements_backup)
             el_url_r = str(choice_element_r.get_attribute("href"))
 
             try:
-                print(f"Random Selected Topic Title : From Right List: {el_url_r}")
+                print(
+                    f"Left List Not Found, Trying Right :: \n  Random Selected Topic Title : From Right List: {el_url_r}")
                 driver.get(el_url_r)
                 time.sleep(3)
+
             except:
                 print(f"Ignored Exception")
 
 
+def insert_entry():
+    print("lol")
 
 
 def check_element_exists(selector, timeout=global_wait_timeout):
@@ -163,8 +236,6 @@ def check_element_exists(selector, timeout=global_wait_timeout):
 
     return element
 
-
-print("Otomatik ekşi entry girme programına hoşgeldiniz\nLütfen istenilen bilgileri eksiksiz giriniz.\n")
 
 email = pyautogui.prompt(text='Lütfen ekşi sözlük E-Posta adresinizi giriniz: ', title='Ekşi Sözlük - EPosta',
                          default='')
@@ -179,6 +250,8 @@ try:
 
             # Set Web Driver and Navigate to URL 9Zvt7yZicqv4.u8
             driver.get(login_url)
+            x = driver.find_element(By.XPATH, passwordSelector)
+            human_like_mouse_move(action,x)
             time.sleep(1)
             send_keys(emailSelector, email)
             send_keys(passwordSelector, password)
@@ -209,8 +282,9 @@ try:
             login_check = check_element_exists(loginInCheckSelector, global_wait_timeout)
             if not login_check:
                 alert = pyautogui.alert(
-                    text="Başaramadık abi",
-                    title="Login Başarısız", button="Tamam")
+                    text="Giriş başarısız, otomasyon girişin başarıyla yapıldığını doğrulayamadı."
+                         " E-Posta ve Şifreniz yanlış olabilir, Lütfen tekrar deneyiniz.",
+                    title="Giriş Başarısız", button="Tamam")
             else:
                 random_get_main_titles(main_titles_selector)
                 time.sleep(1)
