@@ -114,25 +114,9 @@ now_time = datetime.datetime.now()
 # Create a connection object
 
 # db area -->
-def create_connection(db_file):
-    """ create a database connection to a SQLite database """
-    conn = None
-    try:
-        if os.path.exists(db_file):
-            conn = sqlite3.connect(db_file)
-        else:
-            print("Database file not found!")
-            # create_database(db_file)
-            conn = sqlite3.connect(db_file)
-
-    except Error as e:
-        print(e)
-
-    return conn
-
 
 try:
-    conn = sqlite3.connect('eksi_database_new.db')
+    conn = sqlite3.connect('../databases/eksi_get_database.db')
     print("Database connection is successful!")
 
     c = conn.cursor()
